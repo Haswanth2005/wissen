@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  password  String
+  role      Role       @default(EMPLOYEE)
+  batch     Batch      @default(NONE)
+  squad     String     @default("")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  bookings  Booking[]
+}
+
+model Seat {
+  id         String      @id @default(cuid())
+  seatNumber String      @unique
+  type       SeatType
+  bookings   Booking[]
+}
+
+model Booking {
+  id        String        @id @default(cuid())
+  userId    String
+  seatId    String
+  date      DateTime
+  status    BookingStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User          @relation(fields: [userId], references: [id])
+  seat      Seat          @relation(fields: [seatId], references: [id])
+
+  @@unique([seatId, date, status])
+}
+
+model SystemConfig {
+  id               String   @id @default(cuid())
+  cycleStartDate   DateTime
+  updatedAt        DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum Batch {
+  A
+  B
+  NONE
+}
+
+enum SeatType {
+  DESIGNATED
+  FLOATING
+}
+
+enum BookingStatus {
+  ACTIVE
+  CANCELLED
+  RELEASED
+}
