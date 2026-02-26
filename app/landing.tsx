@@ -2,15 +2,27 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { SparklesPreviewDark } from '@/components/ui/sparkles-demo';
-import { DisplayCardsDemo } from '@/components/ui/display-cards-demo';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+
+const FEATURES = [
+  { icon: '🗺️', title: 'Live Floor Map', desc: 'Real-time seat visualization' },
+  { icon: '🤖', title: 'AI Recommendations', desc: 'Smart desk suggestions' },
+  { icon: '📅', title: 'Smart Scheduling', desc: 'Batch-based organization' },
+  { icon: '📊', title: 'Analytics', desc: 'Occupancy insights' },
+];
+
+const STATS = [
+  { val: '$1B', label: 'Project Value' },
+  { val: '20+', label: 'Fortune 500 Clients' },
+  { val: '4000+', label: 'Professionals' },
+];
 
 export default function LandingPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [showContent, setShowContent] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     if (!loading) {
@@ -22,96 +34,131 @@ export default function LandingPage() {
     }
   }, [user, loading, router]);
 
+  useEffect(() => {
+    if (!showContent) return;
+
+    const handleScroll = () => {
+      const progress = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+      setScrollProgress(Math.min(progress, 1));
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showContent]);
+
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
-        <div style={{ width: 32, height: 32, border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="flex items-center justify-center h-screen bg-[#050810]">
+        <div className="w-8 h-8 border-2 border-[#4845D4] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
+  if (!showContent) return null;
+
   return (
-    <>
-      {showContent && (
-        <div className="fade-in">
-          {/* Sparkles Hero Section */}
-          <section style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', inset: 0, zIndex: 1, opacity: 0.6 }}>
-              <SparklesPreviewDark />
-            </div>
-            {/* dark overlay for readability */}
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,30,0.5)', zIndex: 2 }} />
-            {/* CTA Overlay */}
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 20, textAlign: 'center', padding: '0 20px' }}>
-              <h1 style={{ fontSize: 60, fontWeight: 900, color: '#fff', marginBottom: 24, lineHeight: 1.1 }}>Wissen Seat Booking</h1>
-              <p style={{ fontSize: 22, color: '#ccc', marginBottom: 48, maxWidth: 650 }}>Smart, efficient seat reservation system for modern workspaces</p>
-              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Link href="/login">
-                  <button style={{ padding: '16px 36px', background: 'linear-gradient(135deg, #6c63ff, #a78bfa)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 18, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, transition: 'transform 0.2s' }} onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.05)')} onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}>
-                    Get Started <ArrowRight size={20} />
-                  </button>
-                </Link>
-                <button style={{ padding: '16px 36px', background: 'transparent', color: '#fff', border: '2px solid #6c63ff', borderRadius: 8, fontSize: 18, fontWeight: 700, cursor: 'pointer', transition: 'background 0.2s, color 0.2s' }} onMouseEnter={e => { e.currentTarget.style.background = '#6c63ff'; e.currentTarget.style.color = '#fff'; }} onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#fff'; }}>
-                  Learn More
-                </button>
-              </div>
-            </div>
-          </section>
+    <div className="bg-[#050810] text-white overflow-x-hidden">
+      {/* Progress Bar */}
+      <div className="fixed top-0 left-0 h-1 bg-gradient-to-r from-[#4845D4] via-[#00C9A7] to-[#7B5CF0] z-50" style={{ width: `${scrollProgress * 100}%` }} />
 
-          {/* Features Section */}
-          <section style={{ padding: '80px 20px', background: 'var(--bg-primary)' }}>
-            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-              <h2 style={{ fontSize: 40, fontWeight: 700, color: 'var(--text-primary)', textAlign: 'center', marginBottom: 60 }}>
-                Key Features
-              </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 32 }}>
-                {[
-                  { emoji: '🎯', title: 'Smart Booking', desc: 'Easily book and manage your seats with our intuitive interface' },
-                  { emoji: '📊', title: 'Real-time Analytics', desc: 'Track occupancy and usage patterns in real-time' },
-                  { emoji: '👥', title: 'Team Management', desc: 'Organize teams and batches for better coordination' },
-                ].map(f => (
-                  <div key={f.title} className="glass" style={{ padding: 32, textAlign: 'center', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-4px)')} onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}>
-                    <div style={{ fontSize: 44, marginBottom: 18 }}>{f.emoji}</div>
-                    <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 14 }}>{f.title}</h3>
-                    <p style={{ fontSize: 15, color: 'var(--text-secondary)' }}>{f.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* Display Cards Section */}
-          <section style={{ padding: '80px 20px', background: 'var(--bg-secondary)' }}>
-            <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
-              <h2 style={{ fontSize: 40, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 20 }}>
-                Trending Updates
-              </h2>
-              <p style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 60 }}>
-                Stay updated with the latest features and announcements
-              </p>
-              <DisplayCardsDemo />
-            </div>
-          </section>
-
-          {/* CTA Section */}
-          <section style={{ padding: '80px 20px', background: 'var(--bg-primary)' }}>
-            <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center', paddingTop: 40 }}>
-              <h2 style={{ fontSize: 40, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 20 }}>
-                Ready to get started?
-              </h2>
-              <p style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 40 }}>
-                Join thousands of users managing their seats efficiently
-              </p>
-              <Link href="/login">
-                <button style={{ padding: '16px 40px', background: 'linear-gradient(135deg, #6c63ff, #a78bfa)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                  Start Now <ArrowRight size={18} />
-                </button>
-              </Link>
-            </div>
-          </section>
+      {/* Navigation */}
+      <nav className={`fixed top-0 left-0 right-0 z-40 px-6 md:px-10 py-4 flex items-center justify-between transition-all duration-300 ${scrollProgress > 0.05 ? 'bg-[#050810]/90 backdrop-blur-xl border-b border-white/5' : ''}`}>
+        <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
+          <Image 
+            src="/6448bf6f06402019562ca4db_Wissen Logo Blue.png" 
+            alt="Wissen Logo" 
+            width={140} 
+            height={40}
+            className="h-8 w-auto"
+          />
+        </Link>
+        <div className="hidden lg:flex items-center gap-12">
+          <a href="#features" className="text-sm text-white/60 hover:text-white transition-colors">Features</a>
+          <a href="#about" className="text-sm text-white/60 hover:text-white transition-colors">About</a>
+          <a href="#contact" className="text-sm text-white/60 hover:text-white transition-colors">Contact</a>
         </div>
-      )}
-    </>
+        <Link href="/login">
+          <button className="px-6 py-2 bg-white/7 border border-white/14 rounded-full text-sm font-semibold hover:bg-[#4845D4] hover:border-[#4845D4] transition-all">Sign In</button>
+        </Link>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="min-h-screen flex flex-col items-center justify-center pt-20 px-6 md:px-10 text-center">
+        <div className="max-w-3xl">
+          <div className="inline-flex items-center gap-2 bg-[#00C9A7]/10 border border-[#00C9A7]/25 rounded-full px-4 py-1.5 mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7]" />
+            <span className="text-xs font-semibold text-[#00C9A7] uppercase tracking-widest">Smart Office Platform</span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
+            Book your desk,<br />
+            <span className="bg-gradient-to-r from-[#4845D4] via-[#7B5CF0] to-[#00C9A7] bg-clip-text text-transparent">instantly.</span>
+          </h1>
+          <p className="text-lg md:text-xl text-white/55 mb-10 max-w-2xl mx-auto leading-relaxed">Wissen's intelligent seat booking platform brings real-time floor maps and AI-powered recommendations to your workplace.</p>
+          <Link href="/login">
+            <button className="px-8 py-3.5 bg-gradient-to-br from-[#4845D4] to-[#7B5CF0] rounded-full font-semibold hover:shadow-2xl hover:shadow-[#4845D4]/60 transition-all">Start Booking →</button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-20 md:py-28 px-6 md:px-10">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-black mb-12 text-center">Powerful Features</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {FEATURES.map((feat, i) => (
+              <div key={i} className="p-6 bg-white/3 border border-white/7 rounded-2xl hover:border-white/14 hover:-translate-y-1 transition-all">
+                <div className="text-4xl mb-4">{feat.icon}</div>
+                <h3 className="font-bold mb-2">{feat.title}</h3>
+                <p className="text-sm text-white/50">{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="py-16 md:py-24 px-6 md:px-10 bg-white/2">
+        <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
+          {STATS.map((stat, i) => (
+            <div key={i} className="text-center">
+              <div className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">{stat.val}</div>
+              <div className="text-xs text-white/40 uppercase tracking-widest mt-2">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* About */}
+      <section className="py-20 md:py-28 px-6 md:px-10">
+        <div className="max-w-3xl mx-auto">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#4845D4] to-[#7B5CF0] flex items-center justify-center font-black text-xl shadow-lg mb-6">W</div>
+          <h2 className="text-3xl md:text-4xl font-black mb-4">About Wissen</h2>
+          <p className="text-white/55 leading-relaxed mb-4">Wissen Technologies has delivered $1 billion in projects for Fortune 500 companies across banking, telecom, healthcare, and manufacturing. Founded in 2000, we bring 25 years of world-class technology expertise to the modern workplace.</p>
+          <p className="text-white/55 leading-relaxed">With 4000+ skilled professionals across 7 global offices, we're committed to making office booking as intelligent and seamless as possible.</p>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 md:py-28 px-6 md:px-10 bg-gradient-to-b from-[#0d1020] to-[#050810] text-center">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-black mb-4">Ready to transform your office?</h2>
+          <p className="text-lg text-white/50 mb-8">Join employees booking smarter every single day.</p>
+          <Link href="/login">
+            <button className="px-8 py-3.5 bg-gradient-to-br from-[#4845D4] to-[#7B5CF0] rounded-full font-semibold hover:shadow-2xl hover:shadow-[#4845D4]/60 transition-all">Start Now →</button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/6 px-6 md:px-10 py-8 text-center text-sm text-white/35">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-center gap-2.5 mb-4">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4845D4] to-[#7B5CF0] flex items-center justify-center font-black text-xs">W</div>
+            <span className="font-black text-xs tracking-widest">WISSEN</span>
+          </div>
+          <p>© 2025 Wissen Technology. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
   );
 }
